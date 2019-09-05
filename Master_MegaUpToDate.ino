@@ -1,4 +1,6 @@
 #include <Servo.h>
+
+// Vars for an Equation called the "exponitialy moving average". it evens out the Pot readings.
 int EMA_S=analogRead(A5);
 float EMA_Const=0.1;
 int EMA_PotValue=0;
@@ -80,13 +82,13 @@ void setup() {
 }
 
 void loop() {
-
+// we call Send Button Messages everyloop. it checks if the button is pressed so that we send a message.
   SendButtonMessages();
   ReadMessage();
   if (SignalEnd==true) {
      HandleData();
    }
-   
+   //this timer is for sending messages. i found that sending message everyloop was too much to handle for the quad so we need every 100 loops or so.
   MessTime=millis();
   if(MessTime-HoldTime>interval){
       HoldTime=MessTime;
@@ -100,12 +102,9 @@ void loop() {
  // PotFilter();
   }
   
-    // reads the value of the potentiometer (value between 0 and 1023)
-   // scale it to use it with the servo library (value between 0 and 180)
-    // Send the signal to the ESC
 
 
-
+// this is for handeling data that i recieveed. Right now unused since we dont recieve data for the controller But its here just incase we change that.
 void HandleData(){
  
    if(Data>190 && Data<280){
@@ -122,7 +121,7 @@ void HandleData(){
    }  
   SignalEnd=false;
 }
-
+//Reads messages. unseded for the controller but here incase we do want to read a message at some point.
   void ReadMessage(){
       char character;
   while(Serial.available()>0){
@@ -142,20 +141,22 @@ void HandleData(){
 }
 
 void  SendMotorsSpeed(){
-      PotMovingAve();
-  
-      MotorPowerPotValue=EMA_S;
+      
+      PotMovingAve();// call the Averaging method to get smooth Pot reading.
+      MotorPowerPotValue=EMA_S;// EMA_S is a global and its changed in the PotMovingAve method.
  
-    
+    //this If checks if the Current power is the same as the Pot value we just read. If we the Power is the Same as the Pot value we just read than there is not Need to Send a signal so we just increae
+    //a counter. we only send that repeated signal if the Counter has reached 500 just incase. This is just another way to reduced the heavy load on the Quad which gives it room to breath.
       if(CurrentPower==MotorPowerPotValue){
         RepeatedMesssageCounter++;
         if(RepeatedMesssageCounter>500){
                  RepeatedMesssageCounter=0;
           CurrentPower=MotorPowerPotValue;
          //sprintf(Buff, "%3d-", MotorPowerPotValue);
-         sprintf(Buff, "%3d-", MotorPowerPotValue);
+         sprintf(Buff, "%3d-", MotorPowerPotValue); //fill the buffer with the the potValue. what the "%3d-" does is format  the PotValue to a chars that are of length 3 at the maximum 
+         //that are Ints and are ending in "-" which is our ending signal.
          Buff[4]='\0';
-         Serial.write(Buff,4);
+         Serial.write(Buff,4);// write the buffer into the serial which is how the Bluetooth module detect messages from eachother.
           }
       }
       else{
@@ -171,19 +172,20 @@ void  SendMotorsSpeed(){
 }
 
 
-
+// Send the X and Y of the joystick of the controller. 
 void  SendQuadDirection(){
-    int Current_X_Reading=analogRead(JoyStickAnlg_X);
+    int Current_X_Reading=analogRead(JoyStickAnlg_X);//read the X of the joystick
      int Current_Y_Reading=analogRead(JoyStickAnlg_Y);
+    
     int MessageMapValue=0;
-Current_X_Reading=MapJoyStick_X(Current_X_Reading);
+Current_X_Reading=MapJoyStick_X(Current_X_Reading); //the Map method returns the mapping of the Joystick
 Current_Y_Reading=MapJoyStick_Y(Current_Y_Reading);
 
     JoyStickAnlgValue_Y=Current_Y_Reading;
   
       JoyStickAnlgValue_X=Current_X_Reading;
  
-
+// the joystick sometimes doesnt return  to its 0,0 poition accurately after releasing it. to avoid reading non zeros when its suppose to be zero,we set 1s to also be zeros.
    if( JoyStickAnlgValue_Y==1||JoyStickAnlgValue_Y==-1){
       JoyStickAnlgValue_Y=0;
     
@@ -195,6 +197,13 @@ Current_Y_Reading=MapJoyStick_Y(Current_Y_Reading);
       }
 
 
+//because we want to stick to max 3 chars (not counting the ending signal char) we need to map the joystick values from 220, 720 to -9 to 9. that way, we can use the first digit to determine direction.
+// and other two digits for X and y . the first digit will tell us which of the other two digits is negative and which is positive. for example:
+//lets say we are moving down left, down left means that both x and y are Negative. for that, we use 500. the 5 will be read in the quad as a signal that the values of x and y are negative and the 00 will 
+//tell the quad that the position of x is 0 and y is 0.  So 528  means  x=-2 , y=-8.   600 Is used for when both are poitive so 695  means x=9 and y=5. and so on .
+
+
+
    if( JoyStickAnlgValue_X==0  && JoyStickAnlgValue_Y==0){MessageMapValue=400;}//downan left==-
   else  if( JoyStickAnlgValue_X<1 && JoyStickAnlgValue_Y<1){MessageMapValue=500;  }
     else if( JoyStickAnlgValue_X>0  && JoyStickAnlgValue_Y>0){MessageMapValue=600;}
@@ -203,11 +212,13 @@ Current_Y_Reading=MapJoyStick_Y(Current_Y_Reading);
 
      //USE ABS 
      //USE ABS
+       
+        // a check to makee sure we dont send too many reepeats.
         if(CurrentJoyStick_X == JoyStickAnlgValue_X &&  CurrentJoyStick_Y == JoyStickAnlgValue_Y ){
         JoyStick_RepeatedMesssageCounter++;
         if(JoyStick_RepeatedMesssageCounter>150){
                  JoyStick_RepeatedMesssageCounter=0;
-        int Message=MessageMapValue+abs(JoyStickAnlgValue_X*10)+abs(JoyStickAnlgValue_Y);
+        int Message=MessageMapValue+abs(JoyStickAnlgValue_X*10)+abs(JoyStickAnlgValue_Y);// here we change the negative values  to positive with abs. we do this so we can create the number we discussed above.
          //sprintf(Buff, "%3d-", MotorPowerPotValue);
          CurrentJoyStick_X=JoyStickAnlgValue_X;
          CurrentJoyStick_Y=JoyStickAnlgValue_Y;
@@ -231,6 +242,8 @@ Current_Y_Reading=MapJoyStick_Y(Current_Y_Reading);
   }
 
 }
+
+   //method to send the Button messages. one click would send a singal signal.
    void SendButtonMessages(){
  
   if(digitalRead(RedButtonPin)==HIGH && RedButtonBool==false){
@@ -253,7 +266,7 @@ Current_Y_Reading=MapJoyStick_Y(Current_Y_Reading);
 
 
 
-
+// this is a small light display in the controller. Not rquired or necissary But its useful for testing and For A nice looking controller.
   void LightLed(){
     if(LedLoop<LoopSpeed*1){
       LedLoop++;
@@ -294,7 +307,7 @@ Current_Y_Reading=MapJoyStick_Y(Current_Y_Reading);
         if(LedLoop+1>12*LoopSpeed){LedLoop=0;}
     }
 
-
+//maps the Values of joystick
    int MapJoyStick_X(int x){
 
    
@@ -311,14 +324,22 @@ Current_Y_Reading=MapJoyStick_Y(Current_Y_Reading);
       return y;
  
   }
-
+// method that evens out the signal of the pot value.
   void PotMovingAve(){
 
 EMA_PotValue=analogRead(Anlg5);
-EMA_PotValue= EMA_PotValue>>3;
-EMA_S=EMA_Const*EMA_PotValue+(1-EMA_Const)*Prev_EMA;
+EMA_PotValue= EMA_PotValue>>3; // we shift instead of map beecause its faster.
+EMA_S=EMA_Const*EMA_PotValue+(1-EMA_Const)*Prev_EMA; /// mathmatical equation from Wikipeedia. source below
 Prev_EMA=EMA_S;
 
 
       
     }
+
+///// Sources////
+//https://www.wilselby.com/research/arducopter/modeling/
+//https://www.youtube.com/watch?v=uOQk8SJso6Q&t=604s
+//https://www.youtube.com/watch?v=AN3yxIBAxTA&t=2s
+//https://en.wikipedia.org/wiki/Moving_average
+//https://www.youtube.com/watch?v=hyME1osgr7s
+//https://en.wikipedia.org/wiki/PID_controller

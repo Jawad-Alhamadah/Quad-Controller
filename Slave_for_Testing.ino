@@ -17,7 +17,7 @@
 
 
 //===== Const ======================
-const byte Size=10;
+const byte Size=10;// thee size of the buffer that the carries the meessage.
 const int LedPin=4;
 const int LedPin2=3;
 const int LedPin3=12;
@@ -26,7 +26,7 @@ const int LedPin3=12;
 
 //====== Motor Const ================
 
-const int Motor1ESC=5;
+const int Motor1ESC=5;//pins connected to the motors.
 const int Motor2ESC=6;
 const int Motor3ESC=7;
 const int Motor4ESC=8;
@@ -35,7 +35,7 @@ const int Motor4ESC=8;
 
 char RecievedMessage[Size];
 char Buff[Size];
-int MessagePosition=0;
+int MessagePosition=0;//a variable that is used to determins the position of the char that we will store in the message arrsy
 Servo ESC;
 Servo ESC2;
 Servo ESC3;
@@ -50,7 +50,7 @@ double Motor_2_Speed=0;
 double Motor_3_Speed=0;
 double Motor_4_Speed=0;
 double MinMicroSeconds_Motor=1000;    //Max MicroSeconds write for the Servo.
-double MaxicroSeconds_Motor=2000;     //Min Micro Seconds Write for the Servo.
+double MaxMicroSeconds_Motor=2000;     //Min Micro Seconds Write for the Servo.
 
 //============== Initial , Desired,Current, Integral Compunent, Derivative Compunent,Error , Input For all Angles:  yaw,pitch,roll =======
 
@@ -64,7 +64,7 @@ float Error_Yaw,Error_Pitch,Error_Roll=0;    // error between the current Angles
 float Prev_Error_Yaw,Prev_Error_Pitch,Prev_Error_Roll,Prev_Error_Altitude=0;
 
 float Current_Altitude=0;
-float CurrentReading_Yaw;
+float CurrentReading_Yaw; // current values coming from the Chip.
 float CurrentReading_Roll;
 float CurrentReading_Pitch;
 float CurrentPidTime;
@@ -77,15 +77,15 @@ char Signal2[4]="300-";
 
 // =========== Message Handeling Bools =====
 
-bool SignalEnd=false;
-int MessTime=0;
-int interval=27000;
+bool SignalEnd=false;// bool to check if thee message ended
+int MessTime=0;//timer.
+int interval=27000;// interval for the timer. this is used because the few seconds at the begining, the chip isnt accurate. it gets better readings with a little bit of time.
 bool ReadInitialAccValues=true;
 int Data;
 
 //============ PID vars====================
 
-float Porpotional_gain=2;
+float Porpotional_gain=2; 
 float Integral_gain=0.005;
 float Derivative_gain=1.1;
 float LastPidTime;
@@ -378,10 +378,7 @@ void setup() {
 //=====================================================================================================================================
    //             Code Provided By IMU Chip Creators
 //=====================================================================================================================================
-//===============================================================================
-//=====================================================================================================================================
-    //                        My Code
-//=====================================================================================================================================
+
 
   pinMode(LedPin,OUTPUT); 
   pinMode(LedPin2,OUTPUT);
@@ -390,10 +387,10 @@ void setup() {
   digitalWrite(LedPin2,LOW);
   digitalWrite(LedPin3,LOW);
 
-  ESC.attach(Motor1ESC , MinMicroSeconds_Motor , MaxicroSeconds_Motor);
-  ESC2.attach(Motor2ESC , MinMicroSeconds_Motor , MaxicroSeconds_Motor);
-  ESC3.attach(Motor3ESC , MinMicroSeconds_Motor , MaxicroSeconds_Motor);
-  ESC4.attach(Motor4ESC , MinMicroSeconds_Motor , MaxicroSeconds_Motor);
+  ESC.attach(Motor1ESC , MinMicroSeconds_Motor , MaxMicroSeconds_Motor); //3
+  ESC2.attach(Motor2ESC , MinMicroSeconds_Motor , MaxMicroSeconds_Motor);//
+  ESC3.attach(Motor3ESC , MinMicroSeconds_Motor , MaxMicroSeconds_Motor);
+  ESC4.attach(Motor4ESC , MinMicroSeconds_Motor , MaxMicroSeconds_Motor);
 ReadInitialAccValues=true;
 }
 
@@ -479,12 +476,12 @@ void loop() {
             mpu.dmpGetQuaternion(&q, fifoBuffer);
             mpu.dmpGetGravity(&gravity, &q);
             mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-         //   Serial.print("ypr\t");
-        //   Serial.print(ypr[0] * 180/M_PI);
-         //   Serial.print("\t");
-         //  Serial.print(ypr[1] * 180/M_PI);
-           // Serial.print("\t");
-         //   Serial.println(ypr[2] * 180/M_PI);
+     //      Serial.print("ypr\t");
+       //   Serial.print(ypr[0] * 180/M_PI);
+     //    Serial.print("\t");
+     //     Serial.print(ypr[1] * 180/M_PI);
+     //    Serial.print("\t");
+          // Serial.println(ypr[2] * 180/M_PI);
 
 
           
@@ -559,6 +556,11 @@ void loop() {
     //            Code Provided By IMU Chip Creators
 //=====================================================================================================================================
 
+
+
+
+
+////////////////////////// MY CODE   ////////////////////////////////////////////////////////////
   ReadMessage(); //Read the Incomeing Message.
   if (SignalEnd==true) {
       HandleMessage(Data);
@@ -576,38 +578,45 @@ void loop() {
     }
   }
   
-  
+  ///////////////// This method reads message from the ccontroller one char at a time. 
  void ReadMessage(){
     char character;
+   //read a char if you recieve one.
     while(Serial.available()>0){
-          SignalEnd=false;
-          character = Serial.read();
-          if(character=='-' ){ // || character==' ' || character=='\0' || character==""
-              SignalEnd=true; 
-              RecievedMessage[MessagePosition]='\0';
-              MessagePosition=0;
-              strncpy(Buff,RecievedMessage,4);
-              Data=atoi(Buff);
+          SignalEnd=false;            // we recieved a signal.
+          character = Serial.read();  //read the char
+          if(character=='-' ){ // "-" is the char we determined to be the end signal char. it can be anything we want but we are used "-".
+              SignalEnd=true; // meessage ended
+              RecievedMessage[MessagePosition]='\0';  //end the array with the \0 . its a needed char in the C language.
+              MessagePosition=0;// reset message position
+              strncpy(Buff,RecievedMessage,4); // write the message in a buffer.
+              Data=atoi(Buff); // change the type of data from A char string to an int.
           }
-          else{RecievedMessage[MessagePosition]=character;
-              MessagePosition++;  
+          else{RecievedMessage[MessagePosition]=character; // save current char in the buffer.
+              MessagePosition++;  // move the position counter one step so that we dont overwrite our previously saved char.
           }
     }
 }
 
 //========== Set the Motor Speed =============
+
+
+//this method sets the motor speeds through changing the Variables Motor_x_Speed. all these variabls will change inside the function call "adjust".
 void SetMotorsSpeed(){
 
    Adjust();
    ESC.writeMicroseconds(Motor_1_Speed);
-   ESC2.writeMicroseconds(Motor_2_Speed); 
-   ESC3.writeMicroseconds(Motor_3_Speed); 
-   ESC4.writeMicroseconds(Motor_4_Speed);  
+   //ESC2.writeMicroseconds(Motor_2_Speed); 
+  // ESC3.writeMicroseconds(Motor_3_Speed); 
+  // ESC4.writeMicroseconds(Motor_4_Speed);  
 }
 
 
 //============ Handle Messages Recieved From From Master========
+
+//This handles the Data after its recieeved. All Data is changed from char array to int. Depeending on the int, we deteermine the appropriate action by the Quad.
 void HandleMessage(int RecievedData){
+    //this If handles the range that is used for the Motor speed.
     if(RecievedData>1 && RecievedData<182){
         MotorPower=RecievedData;
        }
@@ -615,17 +624,19 @@ void HandleMessage(int RecievedData){
          Data=0;
          MotorPower=0;
        }
-    HandleMessageLEDS(RecievedData);
+    HandleMessageLEDS(RecievedData);// we send the data to the smaller method HandleMesagesLED which.
     SignalEnd=false;
 }
 
 void HandleMessageLEDS(int RecievedData){
+  //Deteermine if the Message is within range to turn one of the leds on.
   if(RecievedData>190 && RecievedData<280){
        if(digitalRead(LedPin2)==HIGH){
           digitalWrite(LedPin2,LOW);
         }
        else{digitalWrite(LedPin2,HIGH);}
    }
+    //Deteermine if the Message is within range to turn one of the leds on.
   if(RecievedData>280 && RecievedData<320){
        if(digitalRead(LedPin3)==HIGH){
           digitalWrite(LedPin3,LOW);
@@ -635,42 +646,55 @@ void HandleMessageLEDS(int RecievedData){
    //mpu.resetFIFO();
 }
 
+
+
+//This method is where we use PID control to adjust the motor Speed to what we think is appropriate.
 void Adjust(){
-    PidTime=millis();
-    TimeError=(PidTime-LastPidTime)/1000;
-    CurrentReading_Yaw=ypr[0] * 180/M_PI;;
+  
+    PidTime=millis(); // we Read the Current time.
+    TimeError=(PidTime-LastPidTime)/1000; // determine an error based on the last time and the current time. we Divide by 1000 because we are using MicroSeconds to control motor speed.
+    CurrentReading_Yaw=ypr[0] * 180/M_PI;; // we read current Angles.
     CurrentReading_Roll=ypr[2] * 180/M_PI;
     CurrentReading_Pitch=ypr[1]* 180/M_PI ;
     
-    Desired_Roll=Initial_Roll;
+    Desired_Roll=Initial_Roll; // the desired_ value are the acc/gyroscope Chip values that we want the quad to try to achive. Because right now we are only trying to get it to fly up, that value is just
+    //the initial reading of the Acc.
     Desired_Pitch=Initial_Pitch;
     
-    Error_Pitch=CurrentReading_Pitch-Desired_Pitch;
+    Error_Pitch=CurrentReading_Pitch-Desired_Pitch; // the error is determined by looking at the curreent reading and subttacing the desired value from it.
     Error_Roll=CurrentReading_Roll-Desired_Roll;
     
-    Integral_Pitch+=(Integral_gain*(Error_Pitch*TimeError));
+    Integral_Pitch+=(Integral_gain*(Error_Pitch*TimeError)); //this is th integral portion useed for the PID
     Integral_Roll+=Integral_gain*(Error_Roll*TimeError);
     
-    Derivative_Roll=Derivative_gain*((Error_Roll-Prev_Error_Roll)/TimeError);
+    Derivative_Roll=Derivative_gain*((Error_Roll-Prev_Error_Roll)/TimeError); // Drevative Portion.
     Derivative_Pitch=Derivative_gain*((Error_Pitch-Prev_Error_Pitch)/TimeError);
     
-    Input_Pitch=(Porpotional_gain*Error_Pitch)+Integral_Pitch+Derivative_Pitch;
+    Input_Pitch=(Porpotional_gain*Error_Pitch)+Integral_Pitch+Derivative_Pitch; //The result of suming all Portions together.
     Input_Roll=(Porpotional_gain*Error_Roll)+Integral_Roll+Derivative_Roll;
     
-    Motor_1_Speed=((MotorPower*MotorPower_Scaler)+1000)-Input_Pitch;
-    Motor_3_Speed=((MotorPower*MotorPower_Scaler)+1000)+Input_Pitch;
-    Motor_2_Speed=((MotorPower*MotorPower_Scaler)+1000)-Input_Roll;
-    Motor_4_Speed=((MotorPower*MotorPower_Scaler)+1000) +Input_Roll;
+  // / Changing the Speeds of the Motor. MotorPower is coming from the controller, motor_scaler is deteermined manually by us.
+  // since we are Using the "" + "" quad configuration then the Motor one is front and motor 2 is Back. and Since moving foward Decreases the Pitch, we subtract and moving backwards increases pitch so we Add.
+  //in general, we want the speed to start at the Minimum and increase with the motor power that is increased by the controller + the Inputs which are Adjustments that we made above.
+    Motor_1_Speed=((MotorPower*MotorPower_Scaler)+MinMicroSeconds_Motor)-Input_Pitch;
+    Motor_3_Speed=((MotorPower*MotorPower_Scaler)+MinMicroSeconds_Motor)+Input_Pitch;
+    Motor_2_Speed=((MotorPower*MotorPower_Scaler)+MinMicroSeconds_Motor)-Input_Roll;
+    Motor_4_Speed=((MotorPower*MotorPower_Scaler)+MinMicroSeconds_Motor) +Input_Roll;
      
-    Serial.print("Motor1: ");Serial.print(Motor_1_Speed);
-    Serial.print("   Motor2: ");Serial.print(Motor_2_Speed);
-    Serial.print("   Motor3: ");Serial.print(Motor_3_Speed);
-    Serial.print("   Motor4: ");Serial.println(Motor_4_Speed);
+    //Serial.print("Motor1: ");Serial.print(Motor_1_Speed);
+    //Serial.print("   Motor2: ");Serial.print(Motor_2_Speed);
+    //Serial.print("   Motor3: ");Serial.print(Motor_3_Speed);
+    //Serial.print("   Motor4: ");Serial.println(Motor_4_Speed);
        
-    Prev_Error_Pitch=Error_Pitch;
+    Prev_Error_Pitch=Error_Pitch; // update values that we neeed to carry for the next loop call.
     Prev_Error_Roll=Error_Roll;
     LastPidTime=PidTime;
 }
+
+//this function reads the initial Acc Values.
+
+
+
 
 void ReadInitial_Yaw_Pitch_Roll(){
     LastPidTime=millis();
@@ -696,3 +720,34 @@ void ReadInitial_Yaw_Pitch_Roll(){
   }
  SignalEnd=false;
   }*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+///////////////////////////            SOURCES               ......................................
+//  https://en.wikipedia.org/wiki/PID_controller
+// https://www.wilselby.com/research/arducopter/modeling/
+// https://www.youtube.com/watch?v=hyME1osgr7s
+//https://www.youtube.com/watch?v=AN3yxIBAxTA&t=2s
+//https://en.wikipedia.org/wiki/Moving_average
+//https://www.youtube.com/watch?v=uOQk8SJso6Q&t=604s
+
+
+
+
+
+
+
+
+
+  
