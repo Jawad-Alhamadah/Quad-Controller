@@ -1,9 +1,6 @@
-// orange blue ----- green red  brown  white 
+//Bluee whit red
 //this beset Version 2
 
-// w b r
-//green orange blue red brown white
-//white  orange skip yellow -red last
 //Quad Weight in Grams : 156
 //Quad thrust Per Pot Value increase:  
 //5=1 157
@@ -114,13 +111,13 @@ double minInput=-250;
 double maxInpu_Yaw=350;
 double minInput_Yaw=-350;
 
-float Porpotional_gain=0.4; 
-float Integral_gain=0;// 3
-float Derivative_gain=0.0; //0.2
+float Porpotional_gain=0.097; //0.3//0.2
+float Integral_gain=0;
+float Derivative_gain=0.0; 
 
-float Porpotional_gain_y=0.1; 
-float Integral_gain_y=0.0;// 3
-float Derivative_gain_y=0; //0.2
+float Porpotional_gain_y=0.01; //0.05//0.05
+float Integral_gain_y=0.0;
+float Derivative_gain_y=0; 
 
 uint32_t LastPidTime;
 uint32_t PidTime;
@@ -130,6 +127,7 @@ uint32_t TimeError;
 unsigned long HoldTime2=0;
 unsigned long interval2=4;
 unsigned long  MessTime2=0;;
+
 //
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -377,9 +375,9 @@ void setup() {
     devStatus = mpu.dmpInitialize();
 
     // supply your own gyro offsets here, scaled for min sensitivity
-    mpu.setXGyroOffset(175);
-    mpu.setYGyroOffset(-51);
-    mpu.setZGyroOffset(10);
+    mpu.setXGyroOffset(107);
+    mpu.setYGyroOffset(-70);
+    mpu.setZGyroOffset(0);
     mpu.setZAccelOffset(563); // 1688 factory default for my test chip
 
     // make sure it worked (returns 0 if so)
@@ -751,27 +749,40 @@ analogWrite(Motor2ESC,0);
 analogWrite(Motor3ESC,0);
 analogWrite(Motor4ESC,0); 
 */
+
+
+
  
- ESC.writeMicroseconds(1000);
-   ESC2.writeMicroseconds(1000); 
-  ESC3.writeMicroseconds(1000); 
-   ESC4.writeMicroseconds(1000);  
+//Motor_1_Speed=map(Motor_1_Speed,0,2000,0,255);
+///Motor_2_Speed=map(Motor_2_Speed,0,2000,0,255);
+//Motor_3_Speed=map(Motor_3_Speed,0,2000,0,255);
+//Motor_4_Speed=map(Motor_4_Speed,0,2000,0,255);
+
+analogWrite(Motor1ESC,1000);
+analogWrite(Motor2ESC,1000);
+analogWrite(Motor3ESC,1000);
+analogWrite(Motor4ESC,1000);  
+
+ //ESC.writeMicroseconds(1000);
+ //  ESC2.writeMicroseconds(1000); 
+ // ESC3.writeMicroseconds(1000); 
+ //  ESC4.writeMicroseconds(1000);  
 delay(200000);
    }
 
 
 //HoldTime=MessTime;
  if(RecievedData>=400 && RecievedData<500){
-            RCx=(RecievedData-400)*4;
+            RCx=(RecievedData-400)*2;
        }
    else     if(RecievedData>=500 && RecievedData<600){
-            RCx=(RecievedData-500)*-4;
+            RCx=(RecievedData-500)*-2;
        }
       else  if(RecievedData>=600 && RecievedData<700){
-            RCy=(RecievedData-600)*-4;
+            RCy=(RecievedData-600)*-2;
         }
        else if(RecievedData>=700 && RecievedData<800){
-            RCy=(RecievedData-700)*4;
+            RCy=(RecievedData-700)*2;
         }
         else if(RecievedData>=800 && RecievedData<900){
             RCy=0.0;
@@ -780,10 +791,10 @@ delay(200000);
             RCx=0.0;
        }
         else if(RecievedData>=200 && RecievedData<300){
-            RCz=(RecievedData-200)*-4;
+            RCz=(RecievedData-200)*-2;
         }
       else if(RecievedData>=300 && RecievedData<400){
-            RCz=(RecievedData-300)*4;
+            RCz=(RecievedData-300)*2;
         }
 
       
@@ -854,6 +865,9 @@ if(gz>maxInput){gz=maxInput;}
     CurrentReading_Yaw=gz_s;; // we read current Angles.ypr[0] * 180/M_PI;; // we ypr[2] * 180/M_PI;ad current Angles.
     CurrentReading_Roll=gx_s;
     CurrentReading_Pitch=gy_s;
+
+
+
 
   Desired_Roll=RCx; // the desired_ value are the acc/gyroscope Chip values that we want the quad to try to achive. Because right now we are only trying to get it to fly up, that value is just
     //the iInitial_Pitchial reading of the Acc.
