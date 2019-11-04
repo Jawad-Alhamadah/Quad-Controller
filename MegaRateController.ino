@@ -8,7 +8,7 @@ const int RedButtonPin=12;
 const int GreenButtonPin=7;
 
 const int Anlg5=A4;
-const byte Size=5;
+const byte Size=7;
 char Signal[4]="194-";
 char Signal2[4]="300-";
 const int Analg6=A6;
@@ -155,6 +155,8 @@ void  SendMotorsSpeed(){
       
       PotMovingAve_Y();
       YawValue=EMA_S_Y;
+
+
       
       YawValue=map(YawValue,0,1023,-45,45);
       if(YawValue<=0){YawValue=abs(YawValue)+200;}
@@ -165,11 +167,13 @@ void  SendMotorsSpeed(){
          Serial.write(Buff,4);
     //this If checks if the Current power is the same as the Pot value we just read. If we the Power is the Same as the Pot value we just read than there is not Need to Send a signal so we just increae
     //a counter. we only send that repeated signal if the Counter has reached 500 just incase. This is just another way to reduced the heavy load on the Quad which gives it room to breath.
+      if(MotorPowerPotValue<1000){MotorPowerPotValue=1000;}
       if(CurrentPower==MotorPowerPotValue){
         RepeatedMesssageCounter++;
         if(RepeatedMesssageCounter>40){
                  RepeatedMesssageCounter=0;
           CurrentPower=MotorPowerPotValue;
+         //  Serial.print("x ::"); Serial.println(x);
          //sprintf(Buff, "%3d-", MotorPowerPotValue);
          sprintf(Buff, "%4d-", MotorPowerPotValue); //fill the buffer with the the potValue. what the "%3d-" does is format  the PotValue to a chars that are of length 3 at the maximum 
          //that are Ints and are ending in "-" which is our ending signal.
@@ -219,12 +223,12 @@ if(JoyStickAnlgValue_Y==1 || JoyStickAnlgValue_Y==2 ||JoyStickAnlgValue_Y==-1 ||
 
         if( JoyStickAnlgValue_X<0  ){MessageMapValue_x=400;}
   else  if( JoyStickAnlgValue_X>0 ){MessageMapValue_x=500;}
-    else  if( JoyStickAnlgValue_X==0 ){MessageMapValue_x=930;}
+    else  if( JoyStickAnlgValue_X==0 ){MessageMapValue_x=900;}
         else{}
         if(  JoyStickAnlgValue_Y<0){MessageMapValue_y=600;}
   else  if( JoyStickAnlgValue_Y>0){MessageMapValue_y=700;}
-else  if( JoyStickAnlgValue_Y==0){MessageMapValue_y=830;}
-
+else  if( JoyStickAnlgValue_Y==0){MessageMapValue_y=800;}
+ //Serial.print("x ::"); Serial.println(x);
 
      //USE ABS 
      //USE ABS
@@ -255,9 +259,6 @@ else  if( JoyStickAnlgValue_Y==0){MessageMapValue_y=830;}
        Serial.write(JoyStick_Buff_x,4);
 
   }
-
-
-
       if(CurrentJoyStick_Y == JoyStickAnlgValue_Y){
         JoyStick_RepeatedMesssageCounter_Y++;
         if(JoyStick_RepeatedMesssageCounter_Y>3){
@@ -359,7 +360,7 @@ else  if( JoyStickAnlgValue_Y==0){MessageMapValue_y=830;}
 
     //  Serial.print("x ::"); Serial.println(x);
       x= map(x,230,796,-45,45);//x
-  // Serial.print("x ::"); Serial.println(x);
+  //Serial.print("x ::"); Serial.println(x);
       return x;
  
   }

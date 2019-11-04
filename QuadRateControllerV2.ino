@@ -111,11 +111,11 @@ double minInput=-250;
 double maxInpu_Yaw=350;
 double minInput_Yaw=-350;
 
-float Porpotional_gain=0.097; //0.3//0.2
+float Porpotional_gain=0.14; //0.3//0.2
 float Integral_gain=0;
 float Derivative_gain=0.0; 
 
-float Porpotional_gain_y=0.01; //0.05//0.05
+float Porpotional_gain_y=0.4; //0.05//0.05
 float Integral_gain_y=0.0;
 float Derivative_gain_y=0; 
 
@@ -787,7 +787,7 @@ delay(200000);
         else if(RecievedData>=800 && RecievedData<900){
             RCy=0.0;
         }
-      else if( RecievedData>=900){
+      else if( RecievedData>=900 && RecievedData<1000){
             RCx=0.0;
        }
         else if(RecievedData>=200 && RecievedData<300){
@@ -796,7 +796,9 @@ delay(200000);
       else if(RecievedData>=300 && RecievedData<400){
             RCz=(RecievedData-300)*2;
         }
-
+  //     Serial.print(" roll : ");Serial.print(RCx);
+  // Serial.print("   itch: ");Serial.print(RCy);
+//  Serial.print("   yaw : ");Serial.println(RCz);
       
       
 
@@ -909,10 +911,10 @@ if(Input_Yaw<-200){Input_Yaw=-200;}
 
 
 
-    Motor_1_Speed=(MotorPower_Throttle)+Input_Roll+Input_Pitch+Input_Yaw;//+
-    Motor_3_Speed=(MotorPower_Throttle)-Input_Roll+Input_Pitch-Input_Yaw;//-
-    Motor_2_Speed=(MotorPower_Throttle)-Input_Roll-Input_Pitch+Input_Yaw;//+
-    Motor_4_Speed=(MotorPower_Throttle) +Input_Roll-Input_Pitch-Input_Yaw;//-
+    Motor_1_Speed=(MotorPower_Throttle)+Input_Roll+Input_Pitch-Input_Yaw;//+
+    Motor_3_Speed=(MotorPower_Throttle)-Input_Roll+Input_Pitch+Input_Yaw;//-
+    Motor_2_Speed=(MotorPower_Throttle)-Input_Roll-Input_Pitch-Input_Yaw;//+
+    Motor_4_Speed=(MotorPower_Throttle) +Input_Roll-Input_Pitch+Input_Yaw;//-
     // Serial.print("   Motor4: ");Serial.println(Motor_1_Speed);
     int MotorMin=1000
     ;
