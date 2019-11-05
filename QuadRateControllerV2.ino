@@ -82,6 +82,17 @@ float Input_Yaw,Input_Pitch,Input_Roll,Input_Altitude=0;    //the result of appl
 float Error_Yaw,Error_Pitch,Error_Roll=0;    // error between the current Angles and Previous angles.
 float Prev_Error_Yaw,Prev_Error_Pitch,Prev_Error_Roll,Prev_Error_Altitude=0;
 
+
+
+//float Desired_Yaw,Desired_Pitch,Desired_Roll=0;   // The Desired Angles at any given moment. initially they will equal the inital values because we want  the quad fly up with no tilts.
+
+float Integral_Yaw_A,Integral_Pitch_A,Integral_Roll_A,Integral_Altitude_A=0; 
+float Derivative_Yaw_A,Derivative_Pitch_A,Derivative_Roll_A=0;
+float Input_Yaw_A,Input_Pitch_A,Input_Roll_A,Input_Altitude_A=0;    //the result of applying the PID to yaw,pitch and roll;
+
+float Error_Yaw_A,Error_Pitch_A,Error_Roll_A=0;    // error between the current Angles and Previous angles.
+float Prev_Error_Yaw_A,Prev_Error_Pitch_A,Prev_Error_Roll_A,Prev_Error_Altitude_A=0;
+
 float Current_Altitude=0;
 float CurrentReading_Yaw; // current values coming from the Chip.
 float CurrentReading_Roll;
@@ -98,7 +109,7 @@ char Signal2[5]="300-";
 
 bool SignalEnd=false;// bool to check if thee message ended
 int MessTime=0;//timer.
-int interval=10000;// interval for the timer. this is used because the few seconds at the begining, the chip isnt accurate. it gets better readings with a little bit of time.
+int interval=20000;// interval for the timer. this is used because the few seconds at the begining, the chip isnt accurate. it gets better readings with a little bit of time.
 bool ReadInitialAccValues=true;
 int Data;
 
@@ -111,11 +122,11 @@ double minInput=-250;
 double maxInpu_Yaw=350;
 double minInput_Yaw=-350;
 
-float Porpotional_gain=0.14; //0.3//0.2
-float Integral_gain=0;
-float Derivative_gain=0.0; 
+float Porpotional_gain=0.093; //0.3//0.2
+float Integral_gain=0.1;
+float Derivative_gain=0.7; 
 
-float Porpotional_gain_y=0.4; //0.05//0.05
+float Porpotional_gain_y=0.41; //0.05//0.05
 float Integral_gain_y=0.0;
 float Derivative_gain_y=0; 
 
@@ -128,6 +139,9 @@ unsigned long HoldTime2=0;
 unsigned long interval2=4;
 unsigned long  MessTime2=0;;
 
+unsigned long HoldTime3=0;
+unsigned long interval3=250;
+unsigned long  MessTime3=0;;
 //
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -240,7 +254,7 @@ double gx_s,gy_s,gz_s;
 // from the FIFO. Note this also requires gravity vector calculations.
 // Also note that yaw/pitch/roll angles suffer from gimbal lock (for
 // more info, see: http://en.wikipedia.org/wiki/Gimbal_lock)
-//#define OUTPUT_READABLE_YAWPITCHROLL
+#define OUTPUT_READABLE_YAWPITCHROLL
 
 // uncomment "OUTPUT_READABLE_REALACCEL" if you want to see acceleration
 // components with gravity removed. This acceleration reference frame is
@@ -375,11 +389,12 @@ void setup() {
     devStatus = mpu.dmpInitialize();
 
     // supply your own gyro offsets here, scaled for min sensitivity
-    mpu.setXGyroOffset(107);
-    mpu.setYGyroOffset(-70);
-    mpu.setZGyroOffset(0);
-    mpu.setZAccelOffset(563); // 1688 factory default for my test chip
-
+    mpu.setXGyroOffset(164);
+    mpu.setYGyroOffset(-52);
+    mpu.setZGyroOffset(8);
+    mpu.setZAccelOffset(560); // 1688 factory default for my test chip
+mpu.setXAccelOffset(641);
+mpu.setYAccelOffset(3804);
     // make sure it worked (returns 0 if so)
     if (devStatus == 0) {
         // turn on the DMP, now that it's ready
@@ -436,7 +451,7 @@ void setup() {
  // ESC4.attach(Motor4ESC , 1000 , 2000);
 ReadInitialAccValues=true;
 
-  accelgyro.setFullScaleGyroRange(MPU6050_GYRO_FS_500);
+  accelgyro.setFullScaleGyroRange(MPU6050_GYRO_FS_250);
 //    accelgyro.getAcceleration(&ax, &ay, &az);
   accelgyro.setDLPFMode(MPU6050_DLPF_BW_20);
 }
@@ -678,9 +693,9 @@ void SetMotorsSpeed(){
 
  //  accelgyro.getRotation(&gx, &gy, &gz);
  accelgyro.getRotation(&gx, &gy, &gz);
-gx_s = (gx_s * 0.7) + ((gx / 65.5) * 0.3);
-gy_s = (gy_s * 0.7) + ((gy / 65.5) * 0.3);
-gz_s = (gz_s * 0.7) + ((gz / 65.5) * 0.3);
+gx_s = (gx_s * 0.7) + ((gx / 133) * 0.3);
+gy_s = (gy_s * 0.7) + ((gy / 133) * 0.3);
+gz_s = (gz_s * 0.7) + ((gz / 133) * 0.3);
  // GyroCounter++;
   
   MessTime2=millis();
@@ -773,16 +788,16 @@ delay(200000);
 
 //HoldTime=MessTime;
  if(RecievedData>=400 && RecievedData<500){
-            RCx=(RecievedData-400)*2;
+            RCx=(RecievedData-400)*5;
        }
    else     if(RecievedData>=500 && RecievedData<600){
-            RCx=(RecievedData-500)*-2;
+            RCx=(RecievedData-500)*-5;
        }
       else  if(RecievedData>=600 && RecievedData<700){
-            RCy=(RecievedData-600)*-2;
+            RCy=(RecievedData-600)*-5;
         }
        else if(RecievedData>=700 && RecievedData<800){
-            RCy=(RecievedData-700)*2;
+            RCy=(RecievedData-700)*5;
         }
         else if(RecievedData>=800 && RecievedData<900){
             RCy=0.0;
@@ -791,14 +806,14 @@ delay(200000);
             RCx=0.0;
        }
         else if(RecievedData>=200 && RecievedData<300){
-            RCz=(RecievedData-200)*-2;
+            RCz=(RecievedData-200)*-5;
         }
       else if(RecievedData>=300 && RecievedData<400){
-            RCz=(RecievedData-300)*2;
+            RCz=(RecievedData-300)*5;
         }
   //     Serial.print(" roll : ");Serial.print(RCx);
   // Serial.print("   itch: ");Serial.print(RCy);
-//  Serial.print("   yaw : ");Serial.println(RCz);
+// Serial.print("   yaw : ");Serial.println(RCz);
       
       
 
@@ -877,16 +892,45 @@ if(gz>maxInput){gz=maxInput;}
     Desired_Yaw=RCz;
 
 
-    Error_Pitch=Desired_Pitch-CurrentReading_Pitch; // the error is determined by looking at the curreent reading and subttacing the desired value from it.
-    Error_Roll=Desired_Roll-CurrentReading_Roll;
-    Error_Yaw=Desired_Yaw-CurrentReading_Yaw;
+
 
     
     //int_errorGain_Pitch=(Error_Pitch);
     //int_errorGain_Roll=Error_Roll;
     //int_errorGain_Yaw=Error_Yaw;
+
+     MessTime3=millis();
+  if(MessTime3-HoldTime3>interval3){
+  //  gx_s =;
+//gy_s /= GyroCounter;
+//gz_s /=GyroCounter;
+      HoldTime3=MessTime3;
+    Error_Pitch=Desired_Pitch-(Initial_Pitch+(ypr[1]*(180/M_PI))); // the error is determined by looking at the curreent reading and subttacing the desired value from it.
+    Error_Roll=Desired_Roll-(Initial_Roll+(ypr[2]*(180/M_PI)));
+    Error_Yaw=Desired_Yaw-(Initial_Yaw+(ypr[0]*(180/M_PI)));
+    // Serial.print("   Motor4:  ");Serial.println(ypr[1]*(180/M_PI));
     
-    Integral_Pitch+=Integral_gain*Error_Pitch; //this is th integral portion useed for the PID
+    Integral_Pitch_A+=Integral_gain*Error_Pitch_A; //this is th integral portion useed for the PID
+    Integral_Roll_A+=Integral_gain*Error_Roll_A;
+    Integral_Yaw_A+=Integral_gain_y*Error_Yaw_A;
+    
+    Derivative_Roll_A=Derivative_gain*((Error_Roll_A-Prev_Error_Roll_A)); // Drevative Portion.
+    Derivative_Pitch_A=Derivative_gain*((Error_Pitch_A-Prev_Error_Pitch_A));
+    Derivative_Yaw_A=Derivative_gain_y*((Error_Yaw_A-Prev_Error_Yaw_A));
+    
+    Input_Pitch_A=(Porpotional_gain*Error_Pitch_A)+Integral_Pitch_A+Derivative_Pitch_A; //The result of suming all Portions together.
+    Input_Roll_A=(Porpotional_gain*Error_Roll_A)+Integral_Roll_A+Derivative_Roll_A;
+    Input_Yaw_A=(Porpotional_gain_y*Error_Yaw_A)+Integral_Yaw_A+Derivative_Yaw_A;
+        Prev_Error_Pitch_A=Error_Pitch_A; // update values that we neeed to carry for the next loop call.
+    Prev_Error_Roll_A=Error_Roll_A;
+    Prev_Error_Yaw_A=Error_Yaw_A;
+      }
+
+    Error_Pitch=Input_Pitch_A-CurrentReading_Pitch; // the error is determined by looking at the curreent reading and subttacing the desired value from it.
+    Error_Roll=Input_Roll_A-CurrentReading_Roll;
+    Error_Yaw=Input_Yaw_A-CurrentReading_Yaw;
+    
+    Integral_Pitch+=Integral_gain*Error_Pitch; 
     Integral_Roll+=Integral_gain*Error_Roll;
     Integral_Yaw+=Integral_gain_y*Error_Yaw;
     
@@ -909,13 +953,11 @@ if(Input_Yaw<-200){Input_Yaw=-200;}
     // since we are Using the "" + "" quad configuration then the Motor one is front and motor 2 is Back. and Since moving foward Decreases the Pitch, we subtract and moving backwards increases pitch so we Add.
     //in general, we want the speed to start at the Minimum and increase with the motor power that is increased by the controller + the Inputs which are Adjustments that we made above.
 
-
-
     Motor_1_Speed=(MotorPower_Throttle)+Input_Roll+Input_Pitch-Input_Yaw;//+
     Motor_3_Speed=(MotorPower_Throttle)-Input_Roll+Input_Pitch+Input_Yaw;//-
     Motor_2_Speed=(MotorPower_Throttle)-Input_Roll-Input_Pitch-Input_Yaw;//+
     Motor_4_Speed=(MotorPower_Throttle) +Input_Roll-Input_Pitch+Input_Yaw;//-
-    // Serial.print("   Motor4: ");Serial.println(Motor_1_Speed);
+
     int MotorMin=1000
     ;
    int MotorMax=2000;
@@ -988,9 +1030,10 @@ if(Motor_4_Speed>MotorMax){Motor_4_Speed=MotorMax;}
 
 void ReadInitial_Yaw_Pitch_Roll(){
     LastPidTime=micros();
-    Initial_Yaw =0.0;
-    Initial_Roll=0.0;
-    Initial_Pitch=0.0;
+   mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+    Initial_Yaw =ypr[0]*(180/M_PI);
+    Initial_Roll=ypr[2]*(180/M_PI);
+    Initial_Pitch=ypr[1]*(180/M_PI);
 }
 //If the Errors are high than we switch to a stronger contolls
 
