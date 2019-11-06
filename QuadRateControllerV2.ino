@@ -109,7 +109,7 @@ char Signal2[5]="300-";
 
 bool SignalEnd=false;// bool to check if thee message ended
 int MessTime=0;//timer.
-int interval=20000;// interval for the timer. this is used because the few seconds at the begining, the chip isnt accurate. it gets better readings with a little bit of time.
+int interval=9000;// interval for the timer. this is used because the few seconds at the begining, the chip isnt accurate. it gets better readings with a little bit of time.
 bool ReadInitialAccValues=true;
 int Data;
 
@@ -122,9 +122,9 @@ double minInput=-250;
 double maxInpu_Yaw=350;
 double minInput_Yaw=-350;
 
-float Porpotional_gain=0.05; //0.05
-float Integral_gain=0.1;//0.1
-float Derivative_gain=0.41; //0.41
+float Porpotional_gain=0.08; //0.05
+float Integral_gain=0.05;//0.1
+float Derivative_gain=0.32; //0.41
 
 float Porpotional_gain_y=0.41; 
 float Integral_gain_y=0.0;
@@ -788,16 +788,16 @@ delay(200000);
 
 //HoldTime=MessTime;
  if(RecievedData>=400 && RecievedData<500){
-            RCx=(RecievedData-400)*5;
+            RCx=(RecievedData-400)*1;
        }
    else     if(RecievedData>=500 && RecievedData<600){
-            RCx=(RecievedData-500)*-5;
+            RCx=(RecievedData-500)*-1;
        }
       else  if(RecievedData>=600 && RecievedData<700){
-            RCy=(RecievedData-600)*-5;
+            RCy=(RecievedData-600)*-1;
         }
        else if(RecievedData>=700 && RecievedData<800){
-            RCy=(RecievedData-700)*5;
+            RCy=(RecievedData-700)*1;
         }
         else if(RecievedData>=800 && RecievedData<900){
             RCy=0.0;
@@ -806,10 +806,10 @@ delay(200000);
             RCx=0.0;
        }
         else if(RecievedData>=200 && RecievedData<300){
-            RCz=(RecievedData-200)*-5;
+            RCz=(RecievedData-200)*-1;
         }
       else if(RecievedData>=300 && RecievedData<400){
-            RCz=(RecievedData-300)*5;
+            RCz=(RecievedData-300)*1;
         }
   //     Serial.print(" roll : ");Serial.print(RCx);
   // Serial.print("   itch: ");Serial.print(RCy);
@@ -926,9 +926,9 @@ if(gz>maxInput){gz=maxInput;}
     Prev_Error_Yaw_A=Error_Yaw_A;
       }
 
-    Error_Pitch=Input_Pitch_A-CurrentReading_Pitch; // the error is determined by looking at the curreent reading and subttacing the desired value from it.
-    Error_Roll=Input_Roll_A-CurrentReading_Roll;
-    Error_Yaw=Input_Yaw_A-CurrentReading_Yaw;
+    Error_Pitch=Desired_Pitch-CurrentReading_Pitch; // the error is determined by looking at the curreent reading and subttacing the desired value from it.
+    Error_Roll=Desired_Roll-CurrentReading_Roll;
+    Error_Yaw=Desired_Yaw-CurrentReading_Yaw;
     
     Integral_Pitch+=Integral_gain*Error_Pitch; 
     Integral_Roll+=Integral_gain*Error_Roll;
