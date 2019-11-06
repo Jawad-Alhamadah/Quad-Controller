@@ -122,11 +122,11 @@ double minInput=-250;
 double maxInpu_Yaw=350;
 double minInput_Yaw=-350;
 
-float Porpotional_gain=0.093; //0.3//0.2
-float Integral_gain=0.1;
-float Derivative_gain=0.7; 
+float Porpotional_gain=0.05; //0.05
+float Integral_gain=0.1;//0.1
+float Derivative_gain=0.41; //0.41
 
-float Porpotional_gain_y=0.41; //0.05//0.05
+float Porpotional_gain_y=0.41; 
 float Integral_gain_y=0.0;
 float Derivative_gain_y=0; 
 
@@ -140,7 +140,7 @@ unsigned long interval2=4;
 unsigned long  MessTime2=0;;
 
 unsigned long HoldTime3=0;
-unsigned long interval3=250;
+unsigned long interval3=300;
 unsigned long  MessTime3=0;;
 //
 
