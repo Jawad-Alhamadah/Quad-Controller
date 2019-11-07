@@ -122,15 +122,15 @@ double minInput=-250;
 double maxInpu_Yaw=350;
 double minInput_Yaw=-350;
 
-float Porpotional_gain=0.0341; //0.05  /0.008 //0.1    //0.1
-float Integral_gain=0.18;//0.1    // 0.06 //0.026   //0.15
-float Derivative_gain=0.6881; //0.41  // 0..4  //0.39  // 0.58
+float Porpotional_gain=0.109944; //0.05  /0.008 //0.1    //0.1 //0.0987 //0.0957  //0.085  //0.01 // 0.08  /0.113  //0.1135883  //0.121  //0.11044
+float Integral_gain=0.06114;//0.1    // 0.06 //0.026   //0.15 //0.09947  //0.09347  //0.13  //0.165 // 0.13  //0.053  //0.0544  //0.0582  //0.06234
+float Derivative_gain=0.225545; //0.41  // 0..4  //0.39  // 0.58  //0.35 //0.4   /0.41  //0.5  // 0.4  //0.235  //0.22134  /0.213  //0.237545
 
 float Porpotional_gain_A=0; //0.05  /0.008
 float Integral_gain_A=0.0;//0.1    // 0.06
 float Derivative_gain_A=0; //0.41  // 0..4
 
-float Porpotional_gain_y=0.3; 
+float Porpotional_gain_y=0.14; 
 float Integral_gain_y=0.0;
 float Derivative_gain_y=0; 
 
@@ -140,11 +140,11 @@ uint32_t TimeError;
 
 
 unsigned long HoldTime2=0;
-unsigned long interval2=7;
+unsigned long interval2=2;
 unsigned long  MessTime2=0;;
 
 unsigned long HoldTime3=0;
-unsigned long interval3=70;
+unsigned long interval3=200;
 unsigned long  MessTime3=0;;
 //
 
@@ -393,12 +393,12 @@ void setup() {
     devStatus = mpu.dmpInitialize();
 
     // supply your own gyro offsets here, scaled for min sensitivity
-    mpu.setXGyroOffset(164);
-    mpu.setYGyroOffset(-52);
-    mpu.setZGyroOffset(8);
-    mpu.setZAccelOffset(560); // 1688 factory default for my test chip
-mpu.setXAccelOffset(641);
-mpu.setYAccelOffset(3804);
+    mpu.setXGyroOffset(180);
+    mpu.setYGyroOffset(-39);
+    mpu.setZGyroOffset(-5);
+    mpu.setZAccelOffset(527); // 1688 factory default for my test chip
+mpu.setXAccelOffset(685);
+mpu.setYAccelOffset(3996);
     // make sure it worked (returns 0 if so)
     if (devStatus == 0) {
         // turn on the DMP, now that it's ready
