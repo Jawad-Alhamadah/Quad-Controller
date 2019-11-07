@@ -123,8 +123,8 @@ double maxInpu_Yaw=350;
 double minInput_Yaw=-350;
 
 float Porpotional_gain=0.1; //0.05  /0.008 //0.1
-float Integral_gain=0.11;//0.1    // 0.06 //0.026
-float Derivative_gain=0.62; //0.41  // 0..4  //0.39
+float Integral_gain=0.15;//0.1    // 0.06 //0.026
+float Derivative_gain=0.58; //0.41  // 0..4  //0.39
 
 float Porpotional_gain_A=0; //0.05  /0.008
 float Integral_gain_A=0.0;//0.1    // 0.06
