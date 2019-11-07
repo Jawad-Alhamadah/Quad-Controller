@@ -122,11 +122,15 @@ double minInput=-250;
 double maxInpu_Yaw=350;
 double minInput_Yaw=-350;
 
-float Porpotional_gain=0.1; //0.05  /0.008
-float Integral_gain=0.02;//0.1    // 0.06
-float Derivative_gain=0.4; //0.41  // 0..4
+float Porpotional_gain=0.1; //0.05  /0.008 //0.1
+float Integral_gain=0.11;//0.1    // 0.06 //0.026
+float Derivative_gain=0.62; //0.41  // 0..4  //0.39
 
-float Porpotional_gain_y=0.41; 
+float Porpotional_gain_A=0; //0.05  /0.008
+float Integral_gain_A=0.0;//0.1    // 0.06
+float Derivative_gain_A=0; //0.41  // 0..4
+
+float Porpotional_gain_y=0.3; 
 float Integral_gain_y=0.0;
 float Derivative_gain_y=0; 
 
@@ -136,11 +140,11 @@ uint32_t TimeError;
 
 
 unsigned long HoldTime2=0;
-unsigned long interval2=4;
+unsigned long interval2=7;
 unsigned long  MessTime2=0;;
 
 unsigned long HoldTime3=0;
-unsigned long interval3=300;
+unsigned long interval3=70;
 unsigned long  MessTime3=0;;
 //
 
@@ -905,21 +909,21 @@ if(gz>maxInput){gz=maxInput;}
 //gy_s /= GyroCounter;
 //gz_s /=GyroCounter;
       HoldTime3=MessTime3;
-    Error_Pitch=Desired_Pitch-(Initial_Pitch+(ypr[1]*(180/M_PI))); // the error is determined by looking at the curreent reading and subttacing the desired value from it.
-    Error_Roll=Desired_Roll-(Initial_Roll+(ypr[2]*(180/M_PI)));
-    Error_Yaw=Desired_Yaw-(Initial_Yaw+(ypr[0]*(180/M_PI)));
+    Error_Pitch_A=Desired_Pitch-(Initial_Pitch+(ypr[1]*(180/M_PI))); // the error is determined by looking at the curreent reading and subttacing the desired value from it.
+    Error_Roll_A=Desired_Roll-(Initial_Roll+(ypr[2]*(180/M_PI)));
+    Error_Yaw_A=Desired_Yaw-(Initial_Yaw+(ypr[0]*(180/M_PI)));
     // Serial.print("   Motor4:  ");Serial.println(ypr[1]*(180/M_PI));
     
-    Integral_Pitch_A+=Integral_gain*Error_Pitch_A; //this is th integral portion useed for the PID
-    Integral_Roll_A+=Integral_gain*Error_Roll_A;
+    Integral_Pitch_A+=Integral_gain_A*Error_Pitch_A; //this is th integral portion useed for the PID
+    Integral_Roll_A+=Integral_gain_A*Error_Roll_A;
     Integral_Yaw_A+=Integral_gain_y*Error_Yaw_A;
     
-    Derivative_Roll_A=Derivative_gain*((Error_Roll_A-Prev_Error_Roll_A)); // Drevative Portion.
-    Derivative_Pitch_A=Derivative_gain*((Error_Pitch_A-Prev_Error_Pitch_A));
+    Derivative_Roll_A=Derivative_gain_A*((Error_Roll_A-Prev_Error_Roll_A)); // Drevative Portion.
+    Derivative_Pitch_A=Derivative_gain_A*((Error_Pitch_A-Prev_Error_Pitch_A));
     Derivative_Yaw_A=Derivative_gain_y*((Error_Yaw_A-Prev_Error_Yaw_A));
     
-    Input_Pitch_A=(Porpotional_gain*Error_Pitch_A)+Integral_Pitch_A+Derivative_Pitch_A; //The result of suming all Portions together.
-    Input_Roll_A=(Porpotional_gain*Error_Roll_A)+Integral_Roll_A+Derivative_Roll_A;
+    Input_Pitch_A=(Porpotional_gain_A*Error_Pitch_A)+Integral_Pitch_A+Derivative_Pitch_A; //The result of suming all Portions together.
+    Input_Roll_A=(Porpotional_gain_A*Error_Roll_A)+Integral_Roll_A+Derivative_Roll_A;
     Input_Yaw_A=(Porpotional_gain_y*Error_Yaw_A)+Integral_Yaw_A+Derivative_Yaw_A;
         Prev_Error_Pitch_A=Error_Pitch_A; // update values that we neeed to carry for the next loop call.
     Prev_Error_Roll_A=Error_Roll_A;
