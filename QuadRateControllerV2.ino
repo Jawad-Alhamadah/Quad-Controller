@@ -122,9 +122,9 @@ double minInput=-250;
 double maxInpu_Yaw=350;
 double minInput_Yaw=-350;
 
-float Porpotional_gain=0.025; //0.05  /0.008 //0.1    //0.1 //0.0987 //0.0957  //0.085  //0.01 // 0.08  /0.113  //0.1135883  //0.121  //0.11044 //0.10709944  //0.025//0.025
-float Integral_gain=0.11;//0.1    // 0.06 //0.026   //0.15 //0.09947  //0.09347  //0.13  //0.165 // 0.13  //0.053  //0.0544  //0.0582  //0.06234  //0.11  /0.11 //0.11
-float Derivative_gain=0.49; //0.41  // 0..4  //0.39  // 0.58  //0.35 //0.4   /0.41  //0.5  // 0.4  //0.235  //0.22134  /0.213  //0.237545  //0.35 //0.38  //0.48
+float Porpotional_gain=0.02; //0.05  /0.008 //0.1     //0.0987 //0.0957  //0.085  //0.01 // 0.08  /0.113  //0.1135883  //0.121  //0.11044 //0.10709944  //0.025//0.025 //0.02;
+float Integral_gain=0.18;//0.1    // 0.06 //0.026    //0.09947  //0.09347  //0.13  //0.165 // 0.13  //0.053  //0.0544  //0.0582  //0.06234  //0.11  /0.11 //0.11 //0.18;
+float Derivative_gain=0.8; //0.41  // 0..4  //0.39    //0.35 //0.4   /0.41  //0.5  // 0.4  //0.235  //0.22134  /0.213  //0.237545  //0.35 //0.38  //0.48  /0.8;
 
 
 float Porpotional_gain_A=0; //0.05  /0.008
@@ -141,7 +141,7 @@ uint32_t TimeError;
 
 
 unsigned long HoldTime2=0;
-unsigned long interval2=4;
+unsigned long interval2=20;
 unsigned long  MessTime2=0;;
 
 unsigned long HoldTime3=0;
@@ -947,12 +947,13 @@ if(gz>maxInput){gz=maxInput;}
     Input_Roll=(Porpotional_gain*Error_Roll)+Integral_Roll+Derivative_Roll;
     Input_Yaw=(Porpotional_gain_y*Error_Yaw)+Integral_Yaw+Derivative_Yaw;
 
-if(Input_Pitch>200){Input_Pitch=200;}
-if(Input_Roll>200){Input_Roll=200;}
-if(Input_Yaw>200){Input_Yaw=200;}
-if(Input_Pitch<-200){Input_Pitch=-200;}
-if(Input_Roll<-200){Input_Roll=-200;}
-if(Input_Yaw<-200){Input_Yaw=-200;}
+int limit=12;
+if(Input_Pitch>limit){Input_Pitch=limit;}
+if(Input_Roll>limit){Input_Roll=limit;}
+if(Input_Yaw>limit){Input_Yaw=limit;}
+if(Input_Pitch<-1*limit){Input_Pitch=-1*limit;}
+if(Input_Roll<-1*limit){Input_Roll=-1*limit;}
+if(Input_Yaw<-1*limit){Input_Yaw=-1*limit;}
 
     // / Changing the Speeds of the Motor. MotorPower is coming from the controller, motor_scaler is deteermined manually by us.
     // since we are Using the "" + "" quad configuration then the Motor one is front and motor 2 is Back. and Since moving foward Decreases the Pitch, we subtract and moving backwards increases pitch so we Add.
