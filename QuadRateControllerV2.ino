@@ -122,18 +122,24 @@ double minInput=-250;
 double maxInpu_Yaw=350;
 double minInput_Yaw=-350;
 
-float Porpotional_gain=0.02; //0.05  /0.008 //0.1     //0.0987 //0.0957  //0.085  //0.01 // 0.08  /0.113  //0.1135883  //0.121  //0.11044 //0.10709944  //0.025//0.025 //0.02;
-float Integral_gain=0.18;//0.1    // 0.06 //0.026    //0.09947  //0.09347  //0.13  //0.165 // 0.13  //0.053  //0.0544  //0.0582  //0.06234  //0.11  /0.11 //0.11 //0.18;
-float Derivative_gain=0.8; //0.41  // 0..4  //0.39    //0.35 //0.4   /0.41  //0.5  // 0.4  //0.235  //0.22134  /0.213  //0.237545  //0.35 //0.38  //0.48  /0.8;
+float Porpotional_gain=0.1;      //0.121  //0.11044 //0.1071 //0.025//0.025 //0.02; //0.02 //0.1  //0.02 //0.04 //0.041; //0.051   /0.1  //0.1
+float Integral_gain=0.145;       //0.0582 //0.06234  //0.11  /0.11  //0.11  //0.18; //0.18 //0.6  //0.055//0.056 //0.0576 //0.1   /0.14  //0.145
+float Derivative_gain=0.6;    //0.213  //0.237545  //0.35 //0.38  //0.48  /0.8;  //1.7  //6    //0.48  //0.52  /0.52  //0.52  /0.52  //0.6
 
 
-float Porpotional_gain_A=0; //0.05  /0.008
-float Integral_gain_A=0.0;//0.1    // 0.06
-float Derivative_gain_A=0; //0.41  // 0..4
+float Porpotional_gain_A=0.00; //0.05  /0.008    //0.02  //0.04
+float Integral_gain_A=0.00;//0.1    // 0.06  //0.002
+float Derivative_gain_A=0.00; //0.41  // 0..4   //0.004  //0.0008
 
-float Porpotional_gain_y=0.14; 
+float Porpotional_gain_y=0.4; 
 float Integral_gain_y=0.0;
 float Derivative_gain_y=0; 
+
+
+//float Velocity_Const=133.0;
+float Velocity_Const=66.0;
+//float Velocity_Const=33.0;
+//float Velocity_Const=16.0;
 
 uint32_t LastPidTime;
 uint32_t PidTime;
@@ -141,11 +147,11 @@ uint32_t TimeError;
 
 
 unsigned long HoldTime2=0;
-unsigned long interval2=20;
+unsigned long interval2=4;
 unsigned long  MessTime2=0;;
 
 unsigned long HoldTime3=0;
-unsigned long interval3=300;
+unsigned long interval3=25;
 unsigned long  MessTime3=0;;
 //
 
@@ -394,11 +400,11 @@ void setup() {
     devStatus = mpu.dmpInitialize();
 
     // supply your own gyro offsets here, scaled for min sensitivity
-    mpu.setXGyroOffset(180);
-    mpu.setYGyroOffset(-39);
-    mpu.setZGyroOffset(-5);
-    mpu.setZAccelOffset(527); // 1688 factory default for my test chip
-mpu.setXAccelOffset(685);
+    mpu.setXGyroOffset(177);
+    mpu.setYGyroOffset(-40);
+    mpu.setZGyroOffset(0);
+    mpu.setZAccelOffset(550); // 1688 factory default for my test chip
+mpu.setXAccelOffset(771);
 mpu.setYAccelOffset(3996);
     // make sure it worked (returns 0 if so)
     if (devStatus == 0) {
@@ -456,7 +462,7 @@ mpu.setYAccelOffset(3996);
  // ESC4.attach(Motor4ESC , 1000 , 2000);
 ReadInitialAccValues=true;
 
-  accelgyro.setFullScaleGyroRange(MPU6050_GYRO_FS_250);
+  accelgyro.setFullScaleGyroRange(MPU6050_GYRO_FS_500);
 //    accelgyro.getAcceleration(&ax, &ay, &az);
   accelgyro.setDLPFMode(MPU6050_DLPF_BW_20);
 }
@@ -694,13 +700,14 @@ delay(5000);
 
 //this method sets the motor speeds through changing the Variables Motor_x_Speed. all these variabls will change inside the function call "adjust".
 void SetMotorsSpeed(){
- 
+
+
 
  //  accelgyro.getRotation(&gx, &gy, &gz);
  accelgyro.getRotation(&gx, &gy, &gz);
-gx_s = (gx_s * 0.7) + ((gx / 133) * 0.3);
-gy_s = (gy_s * 0.7) + ((gy / 133) * 0.3);
-gz_s = (gz_s * 0.7) + ((gz / 133) * 0.3);
+gx_s = (gx_s * 0.7) + ((gx / Velocity_Const) * 0.3);
+gy_s = (gy_s * 0.7) + ((gy / Velocity_Const) * 0.3);
+gz_s = (gz_s * 0.7) + ((gz / Velocity_Const) * 0.3);
  // GyroCounter++;
   
   MessTime2=millis();
@@ -947,7 +954,7 @@ if(gz>maxInput){gz=maxInput;}
     Input_Roll=(Porpotional_gain*Error_Roll)+Integral_Roll+Derivative_Roll;
     Input_Yaw=(Porpotional_gain_y*Error_Yaw)+Integral_Yaw+Derivative_Yaw;
 
-int limit=12;
+int limit=150;
 if(Input_Pitch>limit){Input_Pitch=limit;}
 if(Input_Roll>limit){Input_Roll=limit;}
 if(Input_Yaw>limit){Input_Yaw=limit;}
