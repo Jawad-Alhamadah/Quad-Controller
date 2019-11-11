@@ -122,14 +122,21 @@ double minInput=-250;
 double maxInpu_Yaw=350;
 double minInput_Yaw=-350;
 
-float Porpotional_gain=0.1;      //0.121  //0.11044 //0.1071 //0.025//0.025 //0.02; //0.02 //0.1  //0.02 //0.04 //0.041; //0.051   /0.1  //0.1
-float Integral_gain=0.145;       //0.0582 //0.06234  //0.11  /0.11  //0.11  //0.18; //0.18 //0.6  //0.055//0.056 //0.0576 //0.1   /0.14  //0.145
-float Derivative_gain=0.6;    //0.213  //0.237545  //0.35 //0.38  //0.48  /0.8;  //1.7  //6    //0.48  //0.52  /0.52  //0.52  /0.52  //0.6
+float Porpotional_gain=0.095;    //best value so far
+float Integral_gain=0.16399;     //best value so far
+float Derivative_gain=0.606;   //best value so far
+
+//float Porpotional_gain=0.095  ;      //0.121  //0.11044 //0.1071 //0.025//0.025 //0.02; //0.02 //0.1  //0.02 //0.04 //0.041; //0.051   /0.1  //0.1  //0.104  //0.104    //0.28
+//float Integral_gain=0.16399;       //0.0582 //0.06234  //0.11  /0.11  //0.11  //0.18; //0.18 //0.6  //0.055//0.056 //0.0576 //0.1   /0.14  //0.145  //0.141  //0.15
+//float Derivative_gain=0.606;    //0.213  //0.237545  //0.35 //0.38  //0.48  /0.8;  //1.7  //6    //0.48  //0.52  /0.52  //0.52  /0.52  //0.6 //0.58  //0.62
 
 
-float Porpotional_gain_A=0.00; //0.05  /0.008    //0.02  //0.04
-float Integral_gain_A=0.00;//0.1    // 0.06  //0.002
-float Derivative_gain_A=0.00; //0.41  // 0..4   //0.004  //0.0008
+
+
+
+float Porpotional_gain_A=1; //0.05  /0.008    //0.02  //0.04
+float Integral_gain_A=0.0005;//0.1    // 0.06  //0.002
+float Derivative_gain_A=0.05; //0.41  // 0..4   //0.004  //0.0008
 
 float Porpotional_gain_y=0.4; 
 float Integral_gain_y=0.0;
@@ -151,7 +158,7 @@ unsigned long interval2=4;
 unsigned long  MessTime2=0;;
 
 unsigned long HoldTime3=0;
-unsigned long interval3=25;
+unsigned long interval3=4;
 unsigned long  MessTime3=0;;
 //
 
@@ -785,10 +792,10 @@ analogWrite(Motor4ESC,0);
 //Motor_3_Speed=map(Motor_3_Speed,0,2000,0,255);
 //Motor_4_Speed=map(Motor_4_Speed,0,2000,0,255);
 
-analogWrite(Motor1ESC,1000);
-analogWrite(Motor2ESC,1000);
-analogWrite(Motor3ESC,1000);
-analogWrite(Motor4ESC,1000);  
+analogWrite(Motor1ESC,0);
+analogWrite(Motor2ESC,0);
+analogWrite(Motor3ESC,0);
+analogWrite(Motor4ESC,0);  
 
  //ESC.writeMicroseconds(1000);
  //  ESC2.writeMicroseconds(1000); 
@@ -917,9 +924,9 @@ if(gz>maxInput){gz=maxInput;}
 //gy_s /= GyroCounter;
 //gz_s /=GyroCounter;
       HoldTime3=MessTime3;
-    Error_Pitch_A=Desired_Pitch-(Initial_Pitch+(ypr[1]*(180/M_PI))); // the error is determined by looking at the curreent reading and subttacing the desired value from it.
-    Error_Roll_A=Desired_Roll-(Initial_Roll+(ypr[2]*(180/M_PI)));
-    Error_Yaw_A=Desired_Yaw-(Initial_Yaw+(ypr[0]*(180/M_PI)));
+    Error_Pitch_A=Desired_Pitch-((ypr[1]*(180/M_PI))); // the error is determined by looking at the curreent reading and subttacing the desired value from it.
+    Error_Roll_A=Desired_Roll-((ypr[2]*(180/M_PI)));
+    Error_Yaw_A=Desired_Yaw-((ypr[0]*(180/M_PI)));
     // Serial.print("   Motor4:  ");Serial.println(ypr[1]*(180/M_PI));
     
     Integral_Pitch_A+=Integral_gain_A*Error_Pitch_A; //this is th integral portion useed for the PID
@@ -933,11 +940,13 @@ if(gz>maxInput){gz=maxInput;}
     Input_Pitch_A=(Porpotional_gain_A*Error_Pitch_A)+Integral_Pitch_A+Derivative_Pitch_A; //The result of suming all Portions together.
     Input_Roll_A=(Porpotional_gain_A*Error_Roll_A)+Integral_Roll_A+Derivative_Roll_A;
     Input_Yaw_A=(Porpotional_gain_y*Error_Yaw_A)+Integral_Yaw_A+Derivative_Yaw_A;
+ 
         Prev_Error_Pitch_A=Error_Pitch_A; // update values that we neeed to carry for the next loop call.
     Prev_Error_Roll_A=Error_Roll_A;
     Prev_Error_Yaw_A=Error_Yaw_A;
       }
 
+Input_Pitch_A=Input_Pitch_A*-1;
     Error_Pitch=Desired_Pitch-CurrentReading_Pitch; // the error is determined by looking at the curreent reading and subttacing the desired value from it.
     Error_Roll=Desired_Roll-CurrentReading_Roll;
     Error_Yaw=Desired_Yaw-CurrentReading_Yaw;
@@ -954,7 +963,7 @@ if(gz>maxInput){gz=maxInput;}
     Input_Roll=(Porpotional_gain*Error_Roll)+Integral_Roll+Derivative_Roll;
     Input_Yaw=(Porpotional_gain_y*Error_Yaw)+Integral_Yaw+Derivative_Yaw;
 
-int limit=150;
+int limit=100;
 if(Input_Pitch>limit){Input_Pitch=limit;}
 if(Input_Roll>limit){Input_Roll=limit;}
 if(Input_Yaw>limit){Input_Yaw=limit;}
@@ -966,7 +975,7 @@ if(Input_Yaw<-1*limit){Input_Yaw=-1*limit;}
     // since we are Using the "" + "" quad configuration then the Motor one is front and motor 2 is Back. and Since moving foward Decreases the Pitch, we subtract and moving backwards increases pitch so we Add.
     //in general, we want the speed to start at the Minimum and increase with the motor power that is increased by the controller + the Inputs which are Adjustments that we made above.
 
-    Motor_1_Speed=(MotorPower_Throttle)+Input_Roll+Input_Pitch-Input_Yaw;//+
+    Motor_1_Speed=(MotorPower_Throttle)+Input_Roll+Input_Pitch-Input_Yaw;//+ 
     Motor_3_Speed=(MotorPower_Throttle)-Input_Roll+Input_Pitch+Input_Yaw;//-
     Motor_2_Speed=(MotorPower_Throttle)-Input_Roll-Input_Pitch-Input_Yaw;//+
     Motor_4_Speed=(MotorPower_Throttle) +Input_Roll-Input_Pitch+Input_Yaw;//-
