@@ -129,7 +129,7 @@ float Derivative_gain=0.0;   //best value so far  /0.606 //.68   /.688    //.670
 
 float Porpotional_gain_A=0.7; //0.05  /0.008    //0.02  //0.04  //.04  /..45  //0.6
 float Integral_gain_A=0.0;//0.1    // 0.06  //0.002                 / ..03 //0
-float Derivative_gain_A=10; //0.41  // 0..4   //0.004  //0.0008     / .12  //7
+float Derivative_gain_A=15; //0.41  // 0..4   //0.004  //0.0008     / .12  //7
 
 float Porpotional_gain_y=.7;  //1.5;  //0.2
 float Integral_gain_y=0.0;
@@ -226,7 +226,7 @@ void loop() {
     ReadInitial_Yaw_Pitch_Roll();
      
     }
-
+ 
 }
   
   ///////////////// This method reads message from the ccontroller one char at a time. 
@@ -296,7 +296,7 @@ void SetMotorsSpeed(){
       Motor_2_Speed=map(Motor_2_Speed,0,2000,0,255);
       Motor_3_Speed=map(Motor_3_Speed,0,2000,0,255);
       Motor_4_Speed=map(Motor_4_Speed,0,2000,0,255);
-      
+    
       analogWrite(Motor1ESC,Motor_1_Speed);
       analogWrite(Motor2ESC,Motor_2_Speed);
       analogWrite(Motor3ESC,Motor_3_Speed);
