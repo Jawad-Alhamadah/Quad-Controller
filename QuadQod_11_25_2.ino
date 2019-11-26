@@ -128,11 +128,11 @@ float Derivative_gain=0.0;   //best value so far  /0.606 //.68   /.688    //.670
 //float Integral_gain=0.16399;       //0.0582 //0.06234  //0.11  /0.11  //0.11  //0.18; //0.18 //0.6  //0.055//0.056 //0.0576 //0.1   /0.14  //0.145  //0.141  //0.15
 //float Derivative_gain=0.606;    //0.213  //0.237545  //0.35 //0.38  //0.48  /0.8;  //1.7  //6    //0.48  //0.52  /0.52  //0.52  /0.52  //0.6 //0.58  //0.62
 
-float Porpotional_gain_A=0.725; //0.72
-float Integral_gain_A=0.036; //0.02 
-float Derivative_gain_A=17.3; //15.3
+float Porpotional_gain_A=0.7326999; //0.72
+float Integral_gain_A=0.032; //0.02 
+float Derivative_gain_A=17.1; //15.3
 
-float Porpotional_gain_y=1;  //1.5;  //0.2
+float Porpotional_gain_y=1.2;  //1.5;  //0.2
 float Integral_gain_y=0.0;
 //Elimmminate the I.  try PD contorlleerr
 
@@ -164,6 +164,7 @@ int gyro_x, gyro_y, gyro_z;
 long acc_x, acc_y, acc_z, acc_total_vector;
 int temperature;
 long gyro_x_cal, gyro_y_cal, gyro_z_cal;
+long acc_x_cal, acc_y_cal, acc_z_cal;
 long loop_timer;
 int lcd_loop_counter;
 float angle_pitch, angle_roll;
@@ -184,13 +185,19 @@ void setup() {
     read_mpu_6050_data();                                              //Read the raw acc and gyro data from the MPU-6050
     gyro_x_cal += gyro_x;                                              //Add the gyro x-axis offset to the gyro_x_cal variable
     gyro_y_cal += gyro_y;                                              //Add the gyro y-axis offset to the gyro_y_cal variable
-    gyro_z_cal += gyro_z;                                              //Add the gyro z-axis offset to the gyro_z_cal variable
+    gyro_z_cal += gyro_z;       
+    acc_x_cal += acc_x;                                              //Add the gyro x-axis offset to the gyro_x_cal variable
+    acc_y_cal += acc_y;                                              //Add the gyro y-axis offset to the gyro_y_cal variable
+    acc_z_cal += acc_z;    //Add the gyro z-axis offset to the gyro_z_cal variable
     delay(3);                                                          //Delay 3us to simulate the 250Hz program loop
   }
   gyro_x_cal /= 2000;                                                  //Divide the gyro_x_cal variable by 2000 to get the avarage offset
   gyro_y_cal /= 2000;                                                  //Divide the gyro_y_cal variable by 2000 to get the avarage offset
   gyro_z_cal /= 2000;                                                  //Divide the gyro_z_cal variable by 2000 to get the avarage offset
-
+  acc_x_cal /=  2000;                                              //Add the gyro x-axis offset to the gyro_x_cal variable
+  acc_y_cal /=  2000;                                              //Add the gyro y-axis offset to the gyro_y_cal variable
+  acc_z_cal /=  2000;
+ 
   loop_timer = micros();       
 
   pinMode(LedPin,OUTPUT); 
@@ -262,7 +269,11 @@ void SetMotorsSpeed(){
       read_mpu_6050_data();                                              
     
       gyro_x -= gyro_x_cal;                                               
-      gyro_y -= gyro_y_cal;                                                
+      gyro_y -= gyro_y_cal;  
+      acc_x  -= acc_x_cal;
+      acc_y  -= acc_y_cal;
+      acc_z  -= acc_z_cal;
+                                                    
 
       angle_pitch += gyro_y * 0.0000611;                                    
       angle_roll += gyro_x * 0.0000611;                                      
@@ -420,7 +431,10 @@ void ReadInitial_Yaw_Pitch_Roll(){
     
       gyro_x -= gyro_x_cal;                                           
       gyro_y -= gyro_y_cal;                                            
-
+      acc_x  -= acc_x_cal;
+      acc_y  -= acc_y_cal;
+      acc_z  -= acc_z_cal;
+      
       angle_pitch += gyro_y * 0.0000611;                                   
       angle_roll += gyro_x * 0.0000611;                                   
 
