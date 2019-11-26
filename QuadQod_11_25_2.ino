@@ -128,9 +128,9 @@ float Derivative_gain=0.0;   //best value so far  /0.606 //.68   /.688    //.670
 //float Integral_gain=0.16399;       //0.0582 //0.06234  //0.11  /0.11  //0.11  //0.18; //0.18 //0.6  //0.055//0.056 //0.0576 //0.1   /0.14  //0.145  //0.141  //0.15
 //float Derivative_gain=0.606;    //0.213  //0.237545  //0.35 //0.38  //0.48  /0.8;  //1.7  //6    //0.48  //0.52  /0.52  //0.52  /0.52  //0.6 //0.58  //0.62
 
-float Porpotional_gain_A=0.72; //0.72
-float Integral_gain_A=0.02; //0.02 
-float Derivative_gain_A=17; //15.3
+float Porpotional_gain_A=0.725; //0.72
+float Integral_gain_A=0.036; //0.02 
+float Derivative_gain_A=17.3; //15.3
 
 float Porpotional_gain_y=1;  //1.5;  //0.2
 float Integral_gain_y=0.0;
@@ -259,50 +259,26 @@ void SetMotorsSpeed(){
       MessTime2=millis();
       if(MessTime2-HoldTime2>interval2){
     
-      read_mpu_6050_data();                                                //Read the raw acc and gyro data from the MPU-6050
+      read_mpu_6050_data();                                              
     
-      gyro_x -= gyro_x_cal;                                                //Subtract the offset calibration value from the raw gyro_x value
-      gyro_y -= gyro_y_cal;                                                //Subtract the offset calibration value from the raw gyro_y value
+      gyro_x -= gyro_x_cal;                                               
+      gyro_y -= gyro_y_cal;                                                
 
-      angle_pitch += gyro_y * 0.0000611;                                    //Calculate the traveled pitch angle and add this to the angle_pitch variable.
-      angle_roll += gyro_x * 0.0000611;                                      //Calculate the traveled roll angle and add this to the angle_roll variable.
-   //   acc_x=acc_x;
-   //   acc_y=acc_y;
-    //  acc_z=acc_z;
+      angle_pitch += gyro_y * 0.0000611;                                    
+      angle_roll += gyro_x * 0.0000611;                                      
+
       angle_roll_acc=atan2(acc_y,acc_z)*57.296;
       angle_pitch_acc=atan2(-1*acc_x,sqrt((acc_y*acc_y)+(acc_z*acc_z)))*57.296;
-   //   angle_pitch -= angle_roll * sin(gyro_z * 0.000001066);                  //If the IMU has yawed transfer the roll angle to the pitch angel.
-     // angle_roll += angle_pitch * sin(gyro_z * 0.000001066);                  //If the IMU has yawed transfer the pitch angle to the roll angel.
-   
-    //  acc_total_vector = sqrt((acc_x*acc_x)+(acc_y*acc_y)+(acc_z*acc_z));       //Calculate the total accelerometer vector.
-      
-      //if(abs(acc_y) < acc_total_vector){                                        //Prevent the asin function to produce a NaN
-        //angle_pitch_acc = asin((float)acc_y/acc_total_vector)* 57.296;          //Calculate the pitch angle.
-     // }
-      //if(abs(acc_x) < acc_total_vector){                                        //Prevent the asin function to produce a NaN
-        //angle_roll_acc = asin((float)acc_x/acc_total_vector)* -57.296;          //Calculate the roll angle.
-      //}
-      //angle_pitch_acc -= 0.0;                                                   //Accelerometer calibration value for pitch.
-      //angle_roll_acc -= 0.0;                                                    //Accelerometer calibration value for roll.
-      
+                                                   
       xAngle = angle_roll * 0.9996 + angle_roll_acc * 0.0004; 
       yAngle = angle_pitch * 0.9996 + angle_pitch_acc * 0.0004;     
-      //Correct the drift of the gyro pitch angle with the accelerometer pitch angle.
-      //xAngle =xAngle*.4;
-     // yAngle =yAngle*.4;
 
-      pitch_level_adjust = angle_pitch * 15;                                    //Calculate the pitch angle correction
-      roll_level_adjust = angle_roll * 15;                                      //Calculate the roll angle correction
-    
       Adjust();
       Motor_1_Speed=map(Motor_1_Speed,0,2000,0,255);
       Motor_2_Speed=map(Motor_2_Speed,0,2000,0,255);
       Motor_3_Speed=map(Motor_3_Speed,0,2000,0,255);
       Motor_4_Speed=map(Motor_4_Speed,0,2000,0,255);
-  //    Serial.print("1:  " );Serial.print(Motor_1_Speed);
- //  Serial.print("2: " );Serial.print(Motor_2_Speed);
- //    Serial.print("3:  " );Serial.print(Motor_3_Speed);
-   //Serial.print("4: " );Serial.println(Motor_4_Speed);
+
       analogWrite(Motor1ESC,Motor_1_Speed);
       analogWrite(Motor2ESC,Motor_2_Speed);
       analogWrite(Motor3ESC,Motor_3_Speed);
@@ -316,36 +292,30 @@ void SetMotorsSpeed(){
 
 //This handles the Data after its recieeved. All Data is changed from char array to int. Depeending on the int, we deteermine the appropriate action by the Quad.
 void HandleMessage(int RecievedData){
-    //this If handles the range that is used for the Motor speed.
-
-    if(RecievedData>=1000 && RecievedData<2000){
+    
+    if(RecievedData>=1000 && RecievedData<2000){ ////this If handles the range that is used for the Motor speed.
         MotorPower_Throttle=RecievedData;
        }
-       else if( RecievedData==1000){ 
-         Data=1000;
-         MotorPower_Throttle=1000;
-  // we send the data to the smaller method HandleMesagesLED which.
-    SignalEnd=false;
-}
-
+    else if( RecievedData==1000){ 
+       Data=1000;
+       MotorPower_Throttle=1000;
+       SignalEnd=false;
+        }
 }
 void HandleMessage_AnglesAndLED(int RecievedData){
-  //Deteermine if the Message is within range to turn one of the leds on.
-        if(RecievedData>190 && RecievedData<197){
+ 
+        if(RecievedData>190 && RecievedData<197){  //Deteermine if the Message is within range to turn one of the leds on.
                if(digitalRead(LedPin2)==HIGH){
                   digitalWrite(LedPin2,LOW);
                 }
                else{digitalWrite(LedPin2,HIGH);}
         
-            analogWrite(Motor1ESC,0);
-            analogWrite(Motor2ESC,0);
-            analogWrite(Motor3ESC,0);
-            analogWrite(Motor4ESC,0);  
-            
-            delay(200000);
-       }
-
-
+           analogWrite(Motor1ESC,0);
+           analogWrite(Motor2ESC,0);
+           analogWrite(Motor3ESC,0);
+           analogWrite(Motor4ESC,0);           
+           delay(200000);
+         }
       // int Base=20;
        int Scale=1;
        if(RecievedData>=400 && RecievedData<500){
@@ -378,26 +348,20 @@ void HandleMessage_AnglesAndLED(int RecievedData){
             RCz=(RecievedData-300)*Scale;
      //       RCz=map(RCz,-45,45,-1*Base,Base);
         }
-
-
 }
 
 
-
-//This method is where we use PID control to adjust the motor Speed to what we think is appropriate.
-void Adjust(){
+void Adjust(){  //This method is where we use PID control to adjust the motor Speed to what we think is appropriate.
 
     Desired_Roll=RCx; 
     Desired_Pitch=RCy;
     Desired_Yaw=RCz;
       
-    Error_Pitch_A=(Desired_Pitch-(yAngle*1.7))-(yAngle-Initial_Pitch); // the error is determined by looking at the curreent reading and subttacing the desired value from it.
-    Error_Roll_A=(Desired_Roll-(xAngle*1.7))-(xAngle-Initial_Roll);
+    Error_Pitch_A=(Desired_Pitch-(yAngle*2))-(yAngle-Initial_Pitch); // the error is determined by looking at the curreent reading and subttacing the desired value from it.
+    Error_Roll_A=(Desired_Roll-(xAngle*2))-(xAngle-Initial_Roll);
 
    // Error_Pitch_A=(Desired_Pitch-(yAngle*1.7))-(yAngle); // the error is determined by looking at the curreent reading and subttacing the desired value from it.
   //  Error_Roll_A=(Desired_Roll-(xAngle*1.7))-(xAngle);
-
-
     Integral_Pitch_A+=Integral_gain_A*Error_Pitch_A; //this is th integral portion useed for the PID
     Integral_Roll_A+=Integral_gain_A*Error_Roll_A;
 
@@ -446,13 +410,12 @@ void Adjust(){
     Prev_Error_Yaw=Error_Yaw;
     LastPidTime=PidTime;
       
-     
-
 }
 
 //this function reads the initial Acc Values.
 
 void ReadInitial_Yaw_Pitch_Roll(){
+
       read_mpu_6050_data();                                            
     
       gyro_x -= gyro_x_cal;                                           
@@ -510,17 +473,6 @@ void setup_mpu_6050_registers(){
   Wire.write(0x08);                                                    //Set the requested starting register
   Wire.endTransmission();                                              //End the transmission
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 ///////////////////////////            SOURCES               ......................................
